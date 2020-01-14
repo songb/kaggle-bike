@@ -36,4 +36,4 @@ model = build_mode()
 model.compile(optimizer=tf.keras.optimizers.Adam(lr=0.01), loss='mse', metrics=['accuracy'])
 model.summary()
 
-history = model.fit(training_data, training_label, epochs=20, batch=128)
+history = model.fit(training_data, training_label, epochs=20, batch_size=128)
