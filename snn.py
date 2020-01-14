@@ -5,8 +5,10 @@ import pandas as pd
 import tensorflow as tf
 from datetime import datetime
 
+from sklearn.preprocessing  import StandardScaler
 
-def cleanData(data):
+
+def clean_data(data):
     data['date'] = data.datetime.apply(lambda x: x.split()[0])
     data['hour'] = data.datetime.apply(lambda x: x.split()[1].split(':')[0]).astype('int')
     data['weekday'] = data.date.apply(lambda dateString: datetime.strptime(dateString, '%Y-%m-%d').weekday())
@@ -37,3 +39,17 @@ model.compile(optimizer=tf.keras.optimizers.Adam(lr=0.01), loss='mse', metrics=[
 model.summary()
 
 history = model.fit(training_data, training_label, epochs=20, batch_size=128)
+
+def clean_data_scale(data):
+    data['date'] = data.datetime.apply(lambda x: x.split()[0])
+    data['hour'] = data.datetime.apply(lambda x: x.split()[1].split(':')[0]).astype('int')
+    data['weekday'] = data.date.apply(lambda dateString: datetime.strptime(dateString, '%Y-%m-%d').weekday())
+    data['month'] = data.date.apply(lambda dateString: datetime.strptime(dateString, '%Y-%m-%d').month)
+    data = data.sample(frac=1)
+    test_index = int(data.shape[0] * 0.8)
+    training_label = data['count'][:test_index]
+    validation_label = data['count'][test_index:]
+    data = data.drop(['casual', 'datetime', 'date', 'registered', 'count', 'atemp'], axis=1)
+    training_x = StandardScaler().fit_transform(data[:test_index])
+    validation_x = StandardScaler().fit_transform(data[test_index:])
+    return training_x, training_label, validation_x, validation_label
